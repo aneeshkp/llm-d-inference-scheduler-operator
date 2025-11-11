@@ -7,11 +7,11 @@ A Kubernetes operator that simplifies deployment and management of distributed L
 The Inference Scheduler Operator provides a declarative, Kubernetes-native way to deploy and manage Large Language Model (LLM) inference services. It automates the configuration of intelligent routing, load balancing, and resource management by leveraging the llm-d ecosystem.
 
 **Key Features:**
-- 🚀 **One-CR Deployment** - Single `InferenceScheduler` Custom Resource creates all necessary components
-- 🎯 **Intelligent Routing** - Automatic request routing based on load, prefix cache hits, and GPU utilization
-- 🔌 **Gateway Flexibility** - Support for multiple gateway implementations (kgateway, Istio, GKE)
-- 📊 **Auto-scaling** - Built-in support for replica management and resource scaling
-- 🔧 **Production Ready** - Follows Kubernetes operator best practices and OLM standards
+- **One-CR Deployment** - Single `InferenceScheduler` Custom Resource creates all necessary components
+- **Intelligent Routing** - Automatic request routing based on load, prefix cache hits, and GPU utilization
+- **Gateway Flexibility** - Support for multiple gateway implementations (kgateway, Istio, GKE)
+- **Auto-scaling** - Built-in support for replica management and resource scaling
+- **Production Ready** - Follows Kubernetes operator best practices and OLM standards
 
 ## Built on llm-d
 
@@ -84,11 +84,11 @@ cd /path/to/inference-scheduler-operator
 ```
 
 The script will:
-- ✅ Verify cluster connectivity
-- ✅ Install Gateway API CRDs
-- ✅ Install Gateway API Inference Extension (GIE)
-- ✅ Help you choose and install a gateway implementation
-- ✅ Verify all components are ready
+- Verify cluster connectivity
+- Install Gateway API CRDs
+- Install Gateway API Inference Extension (GIE)
+- Help you choose and install a gateway implementation
+- Verify all components are ready
 
 ### Manual Installation
 
@@ -334,21 +334,6 @@ kubectl get gatewayclass
 
 ## Architecture Decisions
 
-### Why Validate Prerequisites Instead of Installing?
-
-This operator follows Kubernetes and OLM best practices:
-
-✅ **Operators should declare dependencies, not install them**
-- Avoids requiring cluster-admin RBAC
-- Prevents conflicts in multi-tenant clusters
-- Works in air-gapped environments
-- Allows platform teams to control versions
-
-❌ **Auto-installing dependencies is an anti-pattern**
-- Requires excessive permissions
-- Creates race conditions
-- Violates separation of concerns
-- Makes debugging harder
 
 See [llm-d documentation](https://github.com/kubernetes-sigs/llm-instance-gateway) for more details on the prerequisites model.
 
