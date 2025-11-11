@@ -1,0 +1,34 @@
+apiVersion: llm.llm-d.io/v1alpha1
+kind: InferenceScheduler
+metadata:
+  name: qwen-inference-cpu
+  namespace: default
+spec:
+  # Prerequisites: Gateway API, GIE, and GatewayClass must be pre-installed
+  # Run: hack/install-prerequisites.sh
+
+  # Model Server - CPU only (no GPU required)
+  modelServer:
+    modelName: "Qwen/Qwen2.5-0.5B-Instruct"
+    hfTokenSecretName: "hf-token"
+    replicas: 2
+
+    # CPU resources only (no GPU)
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+      limits:
+        cpu: "4"
+        memory: "8Gi"
+
+  # Endpoint Picker with minimal plugins
+  endpointPicker:
+    plugins:
+      loadAwareScorer:
+        enabled: true
+        weight: 1.0
+
+  # Gateway with ClusterIP for testing
+  gateway:
+    serviceType: "ClusterIP"

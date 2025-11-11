@@ -1,0 +1,42 @@
+apiVersion: llm.llm-d.io/v1alpha1
+kind: InferenceScheduler
+metadata:
+  labels:
+    app.kubernetes.io/name: inference-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: llama-inference-istio
+spec:
+  # Prerequisites: Gateway API, GIE, and Istio must be pre-installed
+  # Run: hack/install-prerequisites.sh and select Istio
+
+  # Model Server Configuration
+  modelServer:
+    type: vllm
+    modelName: "meta-llama/Llama-3.1-8B-Instruct"
+    replicas: 3
+    enablePrefixCaching: true
+    gpuMemoryUtilization: 0.9
+    hfTokenSecretName: "hf-token"
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+        memory: "16Gi"
+
+  # Endpoint Picker Configuration
+  endpointPicker:
+    plugins:
+      loadAwareScorer:
+        enabled: true
+        weight: 1.0
+      prefixCacheScorer:
+        enabled: true
+        weight: 2.0
+      kvCacheUtilizationScorer:
+        enabled: true
+        weight: 1.0
+
+  # Gateway Configuration - Using Istio
+  gateway:
+    className: "istio"  # Using Istio instead of kgateway
+    listenerPort: 80
+    serviceType: "LoadBalancer"

@@ -1,0 +1,16 @@
+apiVersion: llm.llm-d.io/v1alpha1
+kind: InferenceScheduler
+metadata:
+  name: qwen-inference-minimal
+spec:
+  # Prerequisites: Gateway API, GIE, and GatewayClass must be pre-installed
+  # Run: hack/install-prerequisites.sh
+
+  # Minimal configuration - uses defaults for most settings
+  modelServer:
+    modelName: "Qwen/Qwen2.5-0.5B-Instruct"
+    hfTokenSecretName: "hf-token"
+    replicas: 2
+    resources:
+      limits:
+        nvidia.com/gpu: "1"

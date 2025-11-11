@@ -1,0 +1,64 @@
+apiVersion: llm.llm-d.io/v1alpha1
+kind: InferenceScheduler
+metadata:
+  labels:
+    app.kubernetes.io/name: inference-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: llama-inference
+spec:
+  # Prerequisites: Ensure Gateway API, GIE, and a GatewayClass are installed
+  # Run: hack/install-prerequisites.sh
+
+  # Model Server Configuration
+  modelServer:
+    type: vllm
+    modelName: "meta-llama/Llama-3.1-8B-Instruct"
+    replicas: 3
+    image: "vllm/vllm-openai:latest"
+    enablePrefixCaching: true
+    gpuMemoryUtilization: 0.9
+    hfTokenSecretName: "hf-token"
+    port: 8000
+    labels:
+      app: vllm
+      model: llama-3.1-8b
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+        memory: "16Gi"
+      requests:
+        cpu: "4"
+        memory: "8Gi"
+
+  # Endpoint Picker (EPP) Configuration
+  endpointPicker:
+    image: "ghcr.io/llm-d/llm-d-inference-scheduler:v0.3.2"
+    replicas: 1
+    grpcPort: 9002
+    plugins:
+      loadAwareScorer:
+        enabled: true
+        weight: 1.0
+        parameters:
+          queueThreshold: "128"
+      prefixCacheScorer:
+        enabled: true
+        weight: 2.0  # Higher weight for cache hits
+        parameters:
+          cacheHitBonus: "1.0"
+      kvCacheUtilizationScorer:
+        enabled: true
+        weight: 1.0
+    resources:
+      limits:
+        cpu: "1"
+        memory: "512Mi"
+      requests:
+        cpu: "500m"
+        memory: "256Mi"
+
+  # Gateway Configuration
+  gateway:
+    className: "kgateway"
+    listenerPort: 80
+    serviceType: "LoadBalancer"  # or ClusterIP, NodePort

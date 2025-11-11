@@ -1,0 +1,63 @@
+apiVersion: llm.llm-d.io/v1alpha1
+kind: InferenceScheduler
+metadata:
+  name: qwen-inference-simulator
+  namespace: default
+spec:
+  # Prerequisites: Gateway API, GIE, and GatewayClass must be pre-installed
+  # Run: hack/install-prerequisites.sh
+
+  # Model Server Configuration for CPU-only/Simulator
+  modelServer:
+    type: vllm
+    modelName: "Qwen/Qwen2.5-0.5B-Instruct"
+    replicas: 2
+
+    # Use vLLM in CPU mode (no GPU required)
+    image: "vllm/vllm-openai:latest"
+
+    # Disable GPU-specific features
+    enablePrefixCaching: false
+
+    # No GPU memory utilization setting needed
+    # gpuMemoryUtilization: not set for CPU mode
+
+    # HuggingFace token secret (still required for model download)
+    hfTokenSecretName: "hf-token"
+
+    # CPU-only resource configuration
+    resources:
+      requests:
+        cpu: "4"
+        memory: "8Gi"
+      limits:
+        cpu: "8"
+        memory: "16Gi"
+
+    # Default port
+    port: 8000
+
+  # Endpoint Picker Configuration
+  endpointPicker:
+    replicas: 1
+    plugins:
+      # Load-aware scoring still useful for CPU-based routing
+      loadAwareScorer:
+        enabled: true
+        weight: 1.0
+        parameters:
+          queueThreshold: "64"
+
+      # Prefix caching scorer disabled (not useful without GPU caching)
+      prefixCacheScorer:
+        enabled: false
+
+      # KV cache utilization not relevant for CPU
+      kvCacheUtilizationScorer:
+        enabled: false
+
+  # Gateway Configuration
+  gateway:
+    className: "kgateway"
+    listenerPort: 80
+    serviceType: "ClusterIP"  # Use ClusterIP for local/testing
